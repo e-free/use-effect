@@ -1,23 +1,54 @@
-import logo from './logo.svg';
+import React, { useState, useEffect } from 'react';
 import './App.css';
+import Details from './components/Details';
+import List from './components/List';
 
 function App() {
+  const [info, setInfo] = useState({ id: null })
+  const [data, setData] = useState({ id: null })
+  const [isLoading, setLoading] = useState(false);
+
+  function handleChoise(id) {
+    setInfo({ id })
+  }
+
+  useEffect(() => {
+    if (data.id) {
+      setLoading(false)
+    } else {
+      setLoading(true)
+    }
+
+    if (info.id) {
+
+      fetch(`https://raw.githubusercontent.com/netology-code/ra16-homeworks/master/hooks-context/use-effect/data/${info.id.id}.json`)
+        .then(response => {
+          if (response.ok) {
+            response.json()
+              .then(d => {
+                setData({ id: d }) 
+              })
+          }
+        })
+        .then(setInfo({ id: 0 }))
+        .then(setLoading(false))
+        .catch(function (error) {
+          console.log(error);
+        })
+      if ((data.id !== null) && (data.id.id !== info.id.id)) {
+        setData({ id: null })
+      }
+
+    }
+  }, [info.id, data]);
+
+
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <List handleChoise={handleChoise} />
+      {isLoading && <p>Загрузка...</p>}
+      {data.id !== null ? <Details data={data.id} /> : null}
     </div>
   );
 }
